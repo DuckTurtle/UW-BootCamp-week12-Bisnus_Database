@@ -22,7 +22,7 @@ class DB {
     viewAllDepartments(){
         return this.connection.promise().query(
             `SELECT department_name, department.id 
-            FROM department`
+            FROM department;`
         )
     }
     viewDepartmentEmployees(department){
@@ -33,13 +33,13 @@ class DB {
         JOIN employee
         ON roles.id = employee.role_id
         WHERE department.id = ?`,
-        department `;`
+        department 
     }
     viewByManager(manager){
         `SELECT employee.id, employee.fist_name, employee.last_name, employee.role_id
         FROM employee
         WHERE manager_id = ?`
-        manager `;`
+        manager 
     }
     updateEmployee(role,employee){
         return this.connection.promise().query(
@@ -47,7 +47,7 @@ class DB {
             SET role_id =?`,
             role ,
             `WHERE id = ?`,
-            employee `;`
+            employee 
         )
     }
     updateEmployeeManager(employee){
@@ -56,43 +56,43 @@ class DB {
         SET manager_id =?`,
         employee,
         `WHERE id = ?`,
-        employee `;`
+        employee 
         )
     }
     addEmployee(employee){
         return this.connection.promise().query(
         `INSERT INTO employee SET ?`,
-        employee `;`
+        employee 
         )
     }
     addRole(role){
         return this.connection.promise().query(
         `INSERT INTO  roles SET ?`,
-        role `;`
+        role 
         )
     }
     addDepartment(department){
         return this.connection.promise().query(
         `INSERT INTO department SET ?`,
-        department `;`
+        department 
         )
     }
     deleteEmployee(employee){
         return this.connection.promise().query(
         `DELETE FROM employee WHERE id =?`,
-        employee `;`
+        employee 
         )
     }
     deleteRole(role){
         return this.connection.promise().query(
         `DELETE FROM roles WHERE id =?`,
-        role `;`
+        role 
         )
     }
     deleteDepartment(department){
         return this.connection.promise().query(
         `DELETE FROM department WHERE id =?`,
-        department `;`
+        department 
         )
     }
 };

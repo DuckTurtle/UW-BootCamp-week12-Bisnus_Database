@@ -5,7 +5,8 @@ const start = () => {
     {
       type: 'list',
       name: 'choice',
-      message: ["View all departments",
+      message: 'What would you like to do?',
+      choices: ["View all departments",
         "View all roles",
         "View all employees",
         "Add department",
@@ -122,7 +123,7 @@ const addEmployees = () => {
             type: 'list',
             name: 'roleId',
             message: "What is the employee's role?",
-            choice: roleChoices
+            choices: roleChoices
           })
             .then(res => {
               let roleID = res.roleID
@@ -138,7 +139,7 @@ const addEmployees = () => {
                     type: "list",
                     name: 'managerID',
                     message: "Who is the employee's manager?",
-                    choice: managerChoices
+                    choices: managerChoices
                   })
                     .then(res => {
                       let employee = {
@@ -175,7 +176,7 @@ const addNewDepartment = () => {
     })
 
 };
-const addNewRole = () => {
+const addNewRole = async () => {
   inquirer.prompt([
     {
       name: 'role_name',
@@ -200,7 +201,7 @@ const addNewRole = () => {
             type: 'list',
             name: 'departmentId',
             message: "What department does this role belong in?",
-            choice: departmentChoices
+            choices: departmentChoices
           })
             .then(res => {
               let role = {
@@ -210,9 +211,9 @@ const addNewRole = () => {
               };
               db.addRole(role);
             })
+            .then(() => console.log(`Added ${roleName} to the Db`))
+            .then(() => start());
         })
-        .then(() => console.log(`Added ${roleName} to the Db`))
-        .then(() => start());
     })
 };
 const updateEmployeeRole = () => {
@@ -227,7 +228,7 @@ const updateEmployeeRole = () => {
         type: 'list',
         name: 'employeeId',
         message: "Who's role are you updating?",
-        choice: employeeChoices
+        choices: employeeChoices
       })
         .then(res => {
           let employeeChoice = res.employeeId
@@ -242,7 +243,7 @@ const updateEmployeeRole = () => {
                 type: 'list',
                 name: 'roleId',
                 message: "What is the employee's new role?",
-                choice: roleChoices
+                choices: roleChoices
               })
                 .then(res => {
                   let role = {
@@ -258,7 +259,7 @@ const updateEmployeeRole = () => {
             })
         })
     })
-}
+};
 const updateEmployeeManager = () => {
   db.viewAllEmployes()
     .then(([rows]) => {
@@ -271,7 +272,7 @@ const updateEmployeeManager = () => {
         type: 'list',
         name: 'employeeId',
         message: "Who's role are you updating?",
-        choice: employeeChoices
+        choices: employeeChoices
       })
         .then(res => {
           let employeeChoice = res.employeeId
@@ -287,7 +288,7 @@ const updateEmployeeManager = () => {
                 type: "list",
                 name: 'managerID',
                 message: "Who is the employee's manager?",
-                choice: managerChoices
+                choices: managerChoices
               })
                 .then(res => {
                   let employee = {
@@ -301,7 +302,7 @@ const updateEmployeeManager = () => {
             })
         })
     })
-}
+};
 const viewEmployeesByManager = () => {
   db.viewAllEmployes()
     .then(([rows]) => {
@@ -315,7 +316,7 @@ const viewEmployeesByManager = () => {
         type: "list",
         name: 'managerID',
         message: "Who is the manager you'd like to look at?",
-        choice: managerChoices
+        choices: managerChoices
       })
         .then(res => {
           let manager = {
@@ -329,7 +330,7 @@ const viewEmployeesByManager = () => {
         })
         .then(() => start());
     })
-}
+};
 const viewEmployeesByDepartment = () => {
   db.viewAllDepartments()
     .then(([rows]) => {
@@ -342,7 +343,7 @@ const viewEmployeesByDepartment = () => {
         type: 'list',
         name: 'departmentId',
         message: "What department do you want to view?",
-        choice: departmentChoices
+        choices: departmentChoices
       })
         .then(res => {
           let departmentChoice = res.departmentId;
@@ -354,7 +355,7 @@ const viewEmployeesByDepartment = () => {
             .then(() => start());
         })
     })
-}
+};
 const deleteADepartment = () => {
   db.viewAllDepartments()
     .then(([rows]) => {
@@ -367,7 +368,7 @@ const deleteADepartment = () => {
         type: 'list',
         name: 'departmentId',
         message: "What department would you like to delete?",
-        choice: departmentChoices
+        choices: departmentChoices
       })
         .then(res => {
           let departmentChoice = res.departmentId;
@@ -390,7 +391,7 @@ const deleteADepartment = () => {
             })
         })
     })
-}
+};
 const deleteARole = () => {
   db.viewAllRoles()
     .then(([rows]) => {
@@ -403,7 +404,7 @@ const deleteARole = () => {
         type: 'list',
         name: 'roleId',
         message: "What role would you like to delete",
-        choice: roleChoices
+        choices: roleChoices
       })
         .then(res => {
           let roleChoice = res.roleId;
@@ -426,7 +427,7 @@ const deleteARole = () => {
             })
         })
     })
-}
+};
 const deleteAEmployee = () => {
   db.viewAllEmployes()
   .then(([rows]) => {
@@ -439,7 +440,7 @@ const deleteAEmployee = () => {
       type: "list",
       name: 'employeeID',
       message: "Who would you like to delete?",
-      choice: employeeChoices
+      choices: employeeChoices
     })
     .then(res => {
       let roleChoice = res.roleId;
@@ -462,7 +463,9 @@ const deleteAEmployee = () => {
         })
     })
   })
-}
+};
 const quit = () => {
   console.log("Job done!")
-}
+  process. exit()
+};
+start();
