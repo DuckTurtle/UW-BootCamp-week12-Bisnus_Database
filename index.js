@@ -1,7 +1,8 @@
 const db = require('./db');
 const inquirer = require("inquirer");
-const start = () => {
-  inquirer.prompt([
+
+const anden = () => {
+  return inquirer.prompt([
     {
       type: 'list',
       name: 'choice',
@@ -22,6 +23,9 @@ const start = () => {
         'Quit?']
     }
   ])
+}
+const start = async () => {
+  await anden()
     .then(res => {
       let choice = res.choice
       switch (choice) {
@@ -46,7 +50,7 @@ const start = () => {
         case 'update employee role':
           updateEmployeeRole();
           break;
-        case '"update enployee manager"':
+        case 'update enployee manager':
           updateEmployeeManager();
           break;
         case 'View employees by manager':
@@ -61,9 +65,9 @@ const start = () => {
         case 'Delete roles':
           deleteARole();
           break;
-         case 'Delete employees':
-        deleteAEmployee();
-        break; 
+        case 'Delete employees':
+          deleteAEmployee();
+          break;
         default:
           quit();
 
@@ -126,13 +130,15 @@ const addEmployees = () => {
             choices: roleChoices
           })
             .then(res => {
-              let roleID = res.roleID
+              let roleID = res.roleId
+              console.log(res.roleId)
               db.viewAllEmployes()
                 .then(([rows]) => {
                   let employees = rows;
-                  const managerChoices = employees.map(({ id, first_name, last_name }) => ({
-                    name: `${first_name} ${last_name}`,
-                    value: id
+                  console.log(employees)
+                  const managerChoices = employees.map(({ Id, First_name, Last_name }) => ({
+                    name: `${First_name} ${Last_name}`,
+                    value: Id
                   }))
                   managerChoices.unshift({ name: 'none', value: null })
                   inquirer.prompt({
@@ -143,15 +149,17 @@ const addEmployees = () => {
                   })
                     .then(res => {
                       let employee = {
-                        manager_id: res.managerID,
-                        role_id: roleID,
                         first_name: firstName,
                         last_name: lastName,
+                        role_id: roleID,
+                        manager_id: res.managerID
                       };
+                      console.log(employee);
                       db.addEmployee(employee);
+                      console.log(`Added ${firstName} ${lastName} to the Db`)
+                      start();
                     })
-                    .then(() => console.log(`Added ${firstName} ${lastName} to the Db`))
-                    .then(() => start());
+                    
                 })
             })
         })
@@ -171,8 +179,8 @@ const addNewDepartment = () => {
         department_name: newDepartment
       };
       db.addDepartment(department)
-        .then(() => console.log(`Added ${newDepartment} to the Db`))
-        .then(() => start());
+      console.log(`Added ${newDepartment} to the Db`);
+      start();
     })
 
 };
@@ -183,6 +191,7 @@ const addNewRole = async () => {
       message: "What is the Role's Title name?"
     },
     {
+      type: "number",
       name: "role_salary",
       message: "What is the role's salary?"
     }
@@ -204,15 +213,16 @@ const addNewRole = async () => {
             choices: departmentChoices
           })
             .then(res => {
-              let role = {
-                mdepartment_id: res.departmentId,
-                title: roleName,
-                salary: roleSalary
-              };
-              db.addRole(role);
+                let role = {
+                  title: roleName,
+                  salary: roleSalary,
+                  department_id: res.departmentId,
+                };
+                db.addRole(role);
+  
+              console.log(`Added ${roleName} to the Db`);
+              start();
             })
-            .then(() => console.log(`Added ${roleName} to the Db`))
-            .then(() => start());
         })
     })
 };
@@ -220,9 +230,9 @@ const updateEmployeeRole = () => {
   db.viewAllEmployes()
     .then(([rows]) => {
       let employees = rows;
-      const employeeChoices = employees.map(({ id, first_name, last_name }) => ({
-        name: `${first_name} ${last_name}`,
-        value: id
+      const employeeChoices = employees.map(({ Id, First_name, Last_name }) => ({
+        name: `${First_name} ${Last_name}`,
+        value: Id
       }))
       inquirer.prompt({
         type: 'list',
@@ -246,16 +256,11 @@ const updateEmployeeRole = () => {
                 choices: roleChoices
               })
                 .then(res => {
-                  let role = {
-                    role_id: res.roleId
-                  }
-                  let employee = {
-                    id: employeeChoice
-                  }
-                  db.updateEmployee(role, employee)
+                  let role = res.roleId
+                  db.updateEmployee(role, employeeChoice);
+                  console.log(`Updated employee's role.`)
+                  start();
                 })
-                .then(() => console.log(`Updated employee's role.`))
-                .then(() => start());
             })
         })
     })
@@ -264,9 +269,9 @@ const updateEmployeeManager = () => {
   db.viewAllEmployes()
     .then(([rows]) => {
       let employees = rows;
-      const employeeChoices = employees.map(({ id, first_name, last_name }) => ({
-        name: `${first_name} ${last_name}`,
-        value: id
+      const employeeChoices = employees.map(({ Id, First_name, Last_name }) => ({
+        name: `${First_name} ${Last_name}`,
+        value: Id
       }))
       inquirer.prompt({
         type: 'list',
@@ -279,9 +284,9 @@ const updateEmployeeManager = () => {
           db.viewAllEmployes()
             .then(([rows]) => {
               let employees = rows;
-              const managerChoices = employees.map(({ id, first_name, last_name }) => ({
-                name: `${first_name} ${last_name}`,
-                value: id
+              const managerChoices = employees.map(({ Id, First_name, Last_name }) => ({
+                name: `${First_name} ${Last_name}`,
+                value: Id
               }))
               managerChoices.unshift({ name: 'none', value: null })
               inquirer.prompt({
@@ -291,14 +296,12 @@ const updateEmployeeManager = () => {
                 choices: managerChoices
               })
                 .then(res => {
-                  let employee = {
-                    manager_id: res.managerID,
-                    id: employeeChoice
-                  };
-                  db.updateEmployeeManager(employee);
+                  let manager = res.managerID
+                  console.log(manager, employeeChoice);
+                  db.updateEmployeeManager(manager, employeeChoice);
+                  console.log(`Updated manager.`)
+                  start();
                 })
-                .then(() => console.log(`Added ${firstName} ${lastName} to the Db`))
-                .then(() => start());
             })
         })
     })
@@ -307,9 +310,9 @@ const viewEmployeesByManager = () => {
   db.viewAllEmployes()
     .then(([rows]) => {
       let employees = rows;
-      const managerChoices = employees.map(({ id, first_name, last_name }) => ({
-        name: `${first_name} ${last_name}`,
-        value: id
+      const managerChoices = employees.map(({ Id, First_name, Last_name }) => ({
+        name: `${First_name} ${Last_name}`,
+        value: Id
       }))
       managerChoices.unshift({ name: 'none', value: null })
       inquirer.prompt({
@@ -318,18 +321,17 @@ const viewEmployeesByManager = () => {
         message: "Who is the manager you'd like to look at?",
         choices: managerChoices
       })
-        .then(res => {
-          let manager = {
-            manager_id: res.managerID
-          };
-          db.viewByManager(manager);
-        })
+      .then(res => {
+        let managerChoice = res.managerID
+        console.log(managerChoice);
+        db.viewByManager(managerChoice)
         .then(([rows]) => {
           let employees = rows;
           console.table(employees)
+          start();
         })
-        .then(() => start());
-    })
+      }) 
+    }) 
 };
 const viewEmployeesByDepartment = () => {
   db.viewAllDepartments()
@@ -351,8 +353,8 @@ const viewEmployeesByDepartment = () => {
             .then(([rows]) => {
               let departments = rows;
               console.table(departments)
+              start();
             })
-            .then(() => start());
         })
     })
 };
@@ -378,15 +380,15 @@ const deleteADepartment = () => {
             message: "Warning: Deleting a department will delete all the roles and employees in the department. \nAre You sure you want to delete this department?",
           })
             .then(res => {
-              let choice = deleteConfirm
+              let choice = res.deleteConfirm
               if (choice === true) {
                 db.deleteDepartment(departmentChoice)
                 console.log("Department has been deleted")
-                  .then(() => start());
+                start();
               }
               else {
                 console.log("Deletion cancled.")
-                  .then(() => start());
+                start();
               }
             })
         })
@@ -414,15 +416,17 @@ const deleteARole = () => {
             message: "Warning: Deleting a role will delete all the employees in the with that role. \nAre You sure you want to delete this Role?",
           })
             .then(res => {
-              let choice = deleteConfirm
+              let choice = res.deleteConfirm
+              
               if (choice === true) {
+                console.log(choice, roleChoice)
                 db.deleteRole(roleChoice)
                 console.log("Role has been deleted")
-                  .then(() => start());
+                start();
               }
               else {
                 console.log("Deletion cancled.")
-                  .then(() => start());
+                start();
               }
             })
         })
@@ -430,42 +434,43 @@ const deleteARole = () => {
 };
 const deleteAEmployee = () => {
   db.viewAllEmployes()
-  .then(([rows]) => {
-    let employees = rows;
-    const employeeChoices = employees.map(({ id, first_name, last_name }) => ({
-      name: `${first_name} ${last_name}`,
-      value: id
-    }))
-    inquirer.prompt({
-      type: "list",
-      name: 'employeeID',
-      message: "Who would you like to delete?",
-      choices: employeeChoices
-    })
-    .then(res => {
-      let roleChoice = res.roleId;
+    .then(([rows]) => {
+      let employees = rows;
+      const employeeChoices = employees.map(({ Id, First_name, Last_name }) => ({
+        name: `${First_name} ${Last_name}`,
+        value: Id
+      }))
       inquirer.prompt({
-        type: 'confirm',
-        name: 'deleteConfirm',
-        message: "Warning: Deleting a employee will delete the employee\nAre You sure you want to delete this employee?",
+        type: "list",
+        name: 'employeeID',
+        message: "Who would you like to delete?",
+        choices: employeeChoices
       })
         .then(res => {
-          let choice = deleteConfirm
-          if (choice === true) {
-            db.deleteRole(roleChoice)
-            console.log("Role has been deleted")
-              .then(() => start());
-          }
-          else {
-            console.log("Deletion cancled.")
-              .then(() => start());
-          }
+          let employChoice = res.employeeID;
+          inquirer.prompt({
+            type: 'confirm',
+            name: 'deleteConfirm',
+            message: "Warning: Deleting a employee will delete the employee\nAre You sure you want to delete this employee?",
+          })
+            .then(res => {
+              let choice = res.deleteConfirm
+              console.log(choice, employChoice);
+              if (choice === true) {
+                db.deleteEmployee(employChoice)
+                console.log("employee has been deleted")
+                start();
+              }
+              else {
+                console.log("Deletion cancled.")
+                start();
+              }
+            })
         })
     })
-  })
 };
 const quit = () => {
   console.log("Job done!")
-  process. exit()
+  process.exit()
 };
 start();
